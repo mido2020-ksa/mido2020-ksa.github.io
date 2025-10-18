@@ -1,12 +1,3 @@
-<!-- Chosen Palette: Nordic Calm -->
-<!-- Application Structure Plan: The SPA is designed as a thematic single-page application with a sticky header for smooth-scroll navigation. The core of the application is an interactive "Core Competencies" dashboard. This structure was chosen because the user's primary challenge is presenting a dual-expertise narrative (Data/Business vs. Cybersecurity). The dashboard allows a recruiter to self-select the "view" most relevant to their role (e.g., a data science hiring manager clicks "Data & Quant"), which then dynamically updates all charts and text to reflect that specific skill set. This is more user-friendly and impactful than a single, long list of mixed skills, as it provides a focused, tailored experience on demand. The user flow is: Hero (Intro) -> About (Narrative) -> Core Competencies (Interactive Exploration) -> Projects (Proof of Skills) -> Education (Credentials) -> Contact (Action). -->
-<!-- Visualization & Content Choices: 
-- User's Dual Expertise -> Goal: Compare/Explore -> Viz/Presentation: Interactive Dashboard with toggle buttons, a central Radar Chart, and a "Key Skills" text block. -> Interaction: User clicks 'Data & Quant' or 'Cybersecurity & Risk' buttons. This single action triggers a JS function to update the Radar Chart's data/labels and the innerHTML of the Key Skills list, showing only relevant information for that role. -> Justification: This is the most effective way to let users explore the two distinct professional personas. A Radar chart is excellent for comparing proficiency across multiple pillars of a skill set. -> Library/Method: Chart.js/Canvas for the chart, Vanilla JS for the state management and DOM updates.
-- Career Path -> Goal: Show Change/Story -> Viz/Presentation: A static "About Me" section framed as a professional narrative. -> Interaction: None. -> Justification: A concise text block is more direct for explaining the career transition than a complex visual. It clearly connects past experience to future goals. -> Library/Method: HTML/CSS.
-- Project Accomplishments -> Goal: Inform/Provide Proof -> Viz/Presentation: Two distinct project cards. -> Interaction: None needed, the summaries are concise and impactful. -> Justification: Clean cards clearly separate the two main project examples (one for data, one for cyber), reinforcing the dual-expertise theme. -> Library/Method: HTML/CSS/Tailwind.
-- Education & Certs -> Goal: Inform/Verify -> Viz/Presentation: Clean, two-column text layout. -> Interaction: External links to Credly/Coursera. -> Justification: A simple, scannable list is the clearest way to present credentials. External links provide verification. -> Library/Method: HTML/CSS.
--->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -14,21 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mohammed Khalifa | Business, Data & Cybersecurity Analyst</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Nordic Calm - Background */
-            color: #334155; /* Nordic Calm - Text */
+            background-color: #f8fafc;
         }
         .section-title {
-            @apply text-3xl font-bold text-slate-800 mb-8 text-center;
+            @apply text-3xl font-bold text-gray-800 mb-8 text-center;
         }
         .card {
             @apply bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 h-full flex flex-col;
+        }
+        .card-content {
+            @apply flex-grow;
+        }
+        .skill-icon {
+            @apply h-16 w-16 mx-auto mb-4 text-blue-600;
         }
         .fade-in-up {
             opacity: 0;
@@ -53,66 +48,56 @@
             visibility: visible;
         }
         .cta-section {
-            background-image: linear-gradient(to right, #3b82f6, #60a5fa); /* Nordic Calm - Primary Gradient */
-        }
-        .active-view-btn {
-            @apply bg-blue-600 text-white;
-        }
-        .inactive-view-btn {
-            @apply bg-white text-slate-600 hover:bg-slate-100;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 40vh;
-            max-height: 400px;
+            background-image: linear-gradient(to right, #0052D4, #4364F7, #6FB1FC);
         }
     </style>
 </head>
-<body class="text-slate-700">
+<body class="text-gray-700">
 
+    <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-slate-800">Mohammed Khalifa</a>
+            <a href="#" class="text-2xl font-bold text-gray-800">Mohammed Khalifa</a>
             <div class="hidden md:flex space-x-6">
-                <a href="#about" class="text-slate-600 hover:text-blue-600 transition">About</a>
-                <a href="#competencies" class="text-slate-600 hover:text-blue-600 transition">Competencies</a>
-                <a href="#projects" class="text-slate-600 hover:text-blue-600 transition">Projects</a>
-                <a href="#education" class="text-slate-600 hover:text-blue-600 transition">Education</a>
-                <a href="#contact" class="text-slate-600 hover:text-blue-600 transition">Contact</a>
+                <a href="#about" class="text-gray-600 hover:text-blue-600 transition">About</a>
+                <a href="#value" class="text-gray-600 hover:text-blue-600 transition">My Value</a>
+                <a href="#projects" class="text-gray-600 hover:text-blue-600 transition">Projects</a>
+                <a href="#education" class="text-gray-600 hover:text-blue-600 transition">Education</a>
+                <a href="#contact" class="text-gray-600 hover:text-blue-600 transition">Contact</a>
             </div>
             <div class="md:hidden">
-                <button id="menu-btn" class="text-slate-800 focus:outline-none" aria-label="Open menu">
+                <button id="menu-btn" class="text-gray-800 focus:outline-none" aria-label="Open menu">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </div>
         </nav>
         <div id="mobile-menu" class="hidden md:hidden overflow-hidden max-h-0">
-             <a href="#about" class="block py-2 px-4 text-sm text-slate-700 hover:bg-slate-100">About</a>
-            <a href="#competencies" class="block py-2 px-4 text-sm text-slate-700 hover:bg-slate-100">Competencies</a>
-            <a href="#projects" class="block py-2 px-4 text-sm text-slate-700 hover:bg-slate-100">Projects</a>
-            <a href="#education" class="block py-2 px-4 text-sm text-slate-700 hover:bg-slate-100">Education</a>
-            <a href="#contact" class="block py-2 px-4 text-sm text-slate-700 hover:bg-slate-100">Contact</a>
+            <a href="#about" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">About</a>
+            <a href="#value" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">My Value</a>
+            <a href="#projects" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Projects</a>
+            <a href="#education" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Education</a>
+            <a href="#contact" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Contact</a>
         </div>
     </header>
 
+    <!-- Hero Section -->
     <section id="home" class="bg-white py-20 md:py-24">
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+                <!-- Profile Logo -->
                 <div class="fade-in-up">
-                    <div class="rounded-full w-48 h-48 md:w-64 md:h-64 object-cover shadow-lg border-4 border-white flex items-center justify-center bg-slate-800">
-                        <svg class="w-2/3 h-2/3 text-white" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <text x="50" y="62" font-family="Inter, sans-serif" font-weight="800" font-size="50" text-anchor="middle" dominant-baseline="middle">MK</text>
+                    <div class="rounded-full w-48 h-48 md:w-64 md:h-64 object-cover shadow-lg border-4 border-white flex items-center justify-center bg-gray-800">
+                        <svg class="w-full h-full text-white" viewBox="0 0 200 200" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <text x="100" y="85" font-family="Inter, sans-serif" font-weight="500" font-size="28" text-anchor="middle" dominant-baseline="middle">MOHAMMED</text>
+                            <text x="100" y="125" font-family="Inter, sans-serif" font-weight="800" font-size="36" text-anchor="middle" dominant-baseline="middle">KHALIFA</text>
                         </svg>
                     </div>
                 </div>
+                <!-- Hero Text -->
                 <div class="text-center md:text-left fade-in-up" style="animation-delay: 0.2s;">
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-4">Mohammed Khalifa</h1>
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-4">Mohammed Khalifa</h1>
                     <p class="text-xl md:text-2xl text-blue-600 font-semibold mb-8">Business Analyst | Data Analyst | Cybersecurity Analyst</p>
-                    <p class="max-w-xl text-lg text-slate-600 mb-10">
+                    <p class="max-w-xl text-lg text-gray-600 mb-10">
                         A driven professional currently pursuing dual Master's degrees, specializing in leveraging data to solve complex business problems and protect critical assets.
                     </p>
                     <div class="flex justify-center md:justify-start space-x-4 flex-wrap gap-y-4">
@@ -120,7 +105,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             Download Data & Business Analyst CV
                         </a>
-                        <a href="Cybersecurity-and-Risk-Analyst-CV.pdf" class="inline-flex items-center bg-slate-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-900 transition transform hover:scale-105 shadow-lg">
+                        <a href="Cybersecurity-and-Risk-Analyst-CV.pdf" class="inline-flex items-center bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition transform hover:scale-105 shadow-lg">
                              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             Download Cybersecurity CV
                         </a>
@@ -130,111 +115,137 @@
         </div>
     </section>
 
+    <!-- About Me Section -->
     <section id="about" class="py-20">
         <div class="container mx-auto px-6">
-            <h2 class="section-title fade-in-up">My Professional Story</h2>
+            <h2 class="section-title fade-in-up">About Me</h2>
             <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 fade-in-up">
-                <p class="text-lg text-slate-600 leading-relaxed">
+                <p class="text-lg text-gray-600 leading-relaxed">
                     I am a highly motivated analyst with a unique educational background, currently combining studies for an <strong>MSc in Financial Engineering</strong> with an <strong>MBA in Business Analytics</strong>. This dual focus is equipping me with advanced quantitative skills and a strategic business mindset. My professional journey from sales and teaching has honed my ability to communicate complex ideas clearly and to approach problems with a detail-oriented, analytical perspective.
                 </p>
-                <p class="text-lg text-slate-600 leading-relaxed mt-4">
+                <p class="text-lg text-gray-600 leading-relaxed mt-4">
                     Whether I am building financial models, analyzing security logs, or developing data-driven business strategies, my goal is always the same: to deliver actionable insights that create tangible value. I am passionate about continuous learning and thrive in environments where I can tackle challenging problems to protect and grow organizational assets.
                 </p>
             </div>
         </div>
     </section>
 
-    <section id="competencies" class="py-20">
+    <!-- My Value Proposition Section -->
+    <section id="value" class="py-20">
         <div class="container mx-auto px-6">
-            <h2 class="section-title fade-in-up">Core Competencies</h2>
-            <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-12 fade-in-up">
-                My skills bridge the gap between deep technical analysis and strategic business impact. Select a view below to explore the specific competencies I bring to each domain. This dashboard allows you to interactively explore my two main areas of expertise.
-            </p>
-            <div class="flex justify-center mb-10 fade-in-up">
-                <div class="rounded-lg p-1 bg-slate-200 flex space-x-1">
-                    <button id="dataBtn" class="px-6 py-2 font-semibold rounded-md transition active-view-btn">Data & Quant</button>
-                    <button id="cyberBtn" class="px-6 py-2 font-semibold rounded-md transition inactive-view-btn">Cybersecurity & Risk</button>
-                </div>
-            </div>
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div class="fade-in-up">
-                    <div class="chart-container">
-                        <canvas id="competencyChart"></canvas>
-                    </div>
-                </div>
-                <div class="fade-in-up">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Key Skills</h3>
-                    <ul id="skillsList" class="space-y-3">
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <section id="projects" class="bg-white py-20">
-        <div class="container mx-auto px-6">
-            <h2 class="section-title fade-in-up">Proof of Work: Key Projects</h2>
-             <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-12 fade-in-up">
-                These capstone projects from my certification programs demonstrate my ability to apply learned skills to real-world scenarios, covering the full lifecycle from data collection and analysis to strategic reporting and security incident response.
-            </p>
-            <div class="grid md:grid-cols-2 gap-8">
+            <h2 class="section-title fade-in-up">My Unique Value</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1: Quantitative & Financial Acumen -->
                 <div class="card fade-in-up">
-                    <div class="card-content">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-3">Data & Quant Capstone: Real Estate Analysis</h3>
-                        <p class="mb-4 text-slate-600">An in-depth quantitative analysis to identify investment opportunities in the Brazilian real estate market.</p>
-                        <ul class="list-disc list-inside mb-4 space-y-1 text-slate-600">
-                            <li>Cleaned and processed a dataset of over 50,000 property listings using Python and SQL.</li>
-                            <li>Identified key drivers of property value using exploratory data analysis and statistical methods.</li>
-                            <li>Built an interactive Tableau dashboard highlighting undervalued areas with a potential 15% ROI.</li>
-                        </ul>
+                    <div class="card-content text-center">
+                        <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 1.085a6.75 6.75 0 01-9 0l-1-1.085m9 0L9 15.415M3 12h18M3 12l1 1.085a6.75 6.75 0 009 0l1-1.085" /></svg></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Quantitative & Financial Acumen</h3>
+                        <p class="text-gray-600">With an MSc in Financial Engineering, I bring rigorous quantitative modeling and risk management skills, allowing me to build financial models and assess the economic impact of business and security decisions.</p>
                     </div>
-                    <p class="font-semibold mt-4 text-slate-800">Technologies Used: <span class="font-normal text-blue-600">Python, SQL, Tableau, Excel</span></p>
                 </div>
+                <!-- Card 2: Data-Driven Strategy -->
                 <div class="card fade-in-up">
-                    <div class="card-content">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-3">Cybersecurity Capstone: SOC Simulation</h3>
-                        <p class="mb-4 text-slate-600">A hands-on lab simulating a Security Operations Center (SOC) to detect and respond to threats using a leading SIEM tool.</p>
-                        <ul class="list-disc list-inside mb-4 space-y-1 text-slate-600">
-                            <li>Investigated security logs from multiple sources in Splunk to identify suspicious activity.</li>
-                            <li>Created custom queries and alerts to automatically detect patterns indicative of malware.</li>
-                            <li>Successfully identified, documented, and escalated simulated security incidents based on protocol.</li>
-                        </ul>
+                    <div class="card-content text-center">
+                        <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A2.625 2.625 0 011.5 18.375v-2.25c0-.621.504-1.125 1.125-1.125h2.25M15 6.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125v-2.25c0-.621.504-1.125 1.125-1.125h2.25M9.375 9.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 019.375 20.25v-9.75z" /></svg></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data-Driven Strategy</h3>
+                        <p class="text-gray-600">My MBA in Business Analytics enables me to translate complex data into actionable business strategy. I don't just find insights; I understand how they connect to the company's bottom line and operational goals.</p>
                     </div>
-                    <p class="font-semibold mt-4 text-slate-800">Technologies Used: <span class="font-normal text-blue-600">Splunk (SIEM), Linux, Windows Event Logs</span></p>
+                </div>
+                <!-- Card 3: Holistic Security Perspective -->
+                <div class="card fade-in-up">
+                    <div class="card-content text-center">
+                        <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" /></svg></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Holistic Security Perspective</h3>
+                        <p class="text-gray-600">Certified in cybersecurity, I understand that security is not just an IT problem, but a business risk. I can analyze threats and vulnerabilities while considering their financial and operational impact on the organization.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Projects Section -->
+    <section id="projects" class="bg-white py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title fade-in-up">Key Projects & Capstones</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="card fade-in-up">
+                    <div class="card-content">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Google Advanced Data Analytics Capstone</h3>
+                        <p class="mb-4">Executed a comprehensive data analysis project, applying advanced techniques to solve a complex business problem and presented findings through advanced visualizations.</p>
+                    </div>
+                    <p class="font-semibold mt-4 text-gray-800">Technologies: <span class="font-normal text-blue-600">Python, Tableau</span></p>
+                </div>
+                <!-- Project 2 -->
+                <div class="card fade-in-up">
+                    <div class="card-content">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">IBM Data Analyst Capstone</h3>
+                        <p class="mb-4">Completed an end-to-end data analysis project involving data collection, wrangling, EDA, and model building, presenting actionable recommendations.</p>
+                    </div>
+                    <p class="font-semibold mt-4 text-gray-800">Technologies: <span class="font-normal text-blue-600">Python, SQL</span></p>
+                </div>
+                <!-- Project 3 -->
+                <div class="card fade-in-up md:col-span-2 lg:col-span-1">
+                    <div class="card-content">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">IBM Cybersecurity Capstone</h3>
+                        <p class="mb-4">Analyzed real-world cybersecurity case studies and developed a comprehensive incident response plan for a simulated corporate data breach based on the NIST framework.</p>
+                    </div>
+                    <p class="font-semibold mt-4 text-gray-800">Frameworks: <span class="font-normal text-blue-600">NIST, Incident Response</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action Section -->
+    <section class="cta-section py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4 fade-in-up">Ready to Bring Value to Your Team?</h2>
+            <p class="text-white text-lg max-w-2xl mx-auto mb-8 fade-in-up">My unique blend of financial, data, and security expertise allows me to tackle complex challenges and deliver results. Explore my detailed qualifications by downloading my CV.</p>
+            <div class="flex justify-center space-x-4 flex-wrap gap-y-4 fade-in-up">
+                <a href="Data-and-Business-Analyst-CV.pdf" class="inline-flex items-center bg-white text-blue-600 font-bold py-3 px-6 rounded-lg hover:bg-gray-200 transition transform hover:scale-105 shadow-lg">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Data and Business Analyst CV
+                </a>
+                <a href="Cybersecurity-and-Risk-Analyst-CV.pdf" class="inline-flex items-center bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition transform hover:scale-105 shadow-lg">
+                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Cybersecurity CV
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education & Certifications -->
     <section id="education" class="py-20">
         <div class="container mx-auto px-6">
-            <h2 class="section-title fade-in-up">Education & Top Certifications</h2>
+            <h2 class="section-title fade-in-up">Education & Certifications</h2>
             <div class="grid md:grid-cols-2 gap-12">
+                <!-- Education Column -->
                 <div class="fade-in-up">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center md:text-left">Education</h3>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center md:text-left">Education</h3>
                     <div class="space-y-6">
                         <div>
                             <p class="text-lg font-semibold">MSc in Financial Engineering</p>
-                            <p class="text-slate-600">Worldquant University (In Progress)</p>
+                            <p class="text-gray-600">Worldquant University (In Progress)</p>
                         </div>
                         <div>
                             <p class="text-lg font-semibold">MBA in Business Analytics</p>
-                            <p class="text-slate-600">O.P. Jindal Global University (In Progress)</p>
+                            <p class="text-gray-600">O.P. Jindal Global University (In Progress)</p>
                         </div>
                          <div>
                             <p class="text-lg font-semibold">Bachelor of Arts in English</p>
-                            <p class="text-slate-600">Bahir Dar University</p>
+                            <p class="text-gray-600">Bahir Dar University</p>
                         </div>
                     </div>
                 </div>
+                <!-- Certifications Column -->
                 <div class="fade-in-up">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center md:text-left">Top Certifications</h3>
-                    <ul class="list-none space-y-3 text-slate-700 font-medium">
-                        <li><span class="text-green-500 mr-2">✔</span> (ISC)² Systems Security Certified Practitioner (SSCP)</li>
-                        <li><span class="text-green-500 mr-2">✔</span> Google Advanced Data Analytics Professional</li>
-                        <li><span class="text-green-500 mr-2">✔</span> Google Cybersecurity Professional</li>
-                        <li><span class="text-green-500 mr-2">✔</span> SAS Visual Business Analytics Professional</li>
-                        <li><span class="text-green-500 mr-2">✔</span> Google Business Intelligence Professional</li>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center md:text-left">Top Certifications</h3>
+                    <ul class="list-none space-y-3 text-gray-700 font-medium">
+                        <li><span class="text-blue-500 mr-2">&#10003;</span> (ISC)² Systems Security Certified Practitioner (SSCP)</li>
+                        <li><span class="text-blue-500 mr-2">&#10003;</span> Google Advanced Data Analytics Professional</li>
+                        <li><span class="text-blue-500 mr-2">&#10003;</span> Google Cybersecurity Professional</li>
+                        <li><span class="text-blue-500 mr-2">&#10003;</span> SAS Visual Business Analytics Professional</li>
+                        <li><span class="text-blue-500 mr-2">&#10003;</span> Google Business Intelligence Professional</li>
                     </ul>
                      <div class="mt-6 flex flex-col sm:flex-row sm:space-x-4">
                          <a href="https://www.credly.com/users/mohammed-khalifa" target="_blank" class="inline-block text-blue-600 hover:underline mb-2 sm:mb-0" aria-label="View my digital badges on Credly">View All Digital Badges &rarr;</a>
@@ -245,6 +256,7 @@
         </div>
     </section>
 
+    <!-- Contact Section -->
     <section id="contact" class="bg-white py-20">
         <div class="container mx-auto px-6 text-center">
             <h2 class="section-title fade-in-up">Get In Touch</h2>
@@ -255,166 +267,51 @@
                 <a href="mailto:hamedkhalifa14@gmail.com" class="text-blue-600 hover:underline text-lg font-medium fade-in-up" aria-label="Email me">
                     hamedkhalifa14@gmail.com
                 </a>
-                <a href="https://www.linkedin.com/in/mohammed-khalifa-8522b6108" target="_blank" class="text-slate-500 hover:text-blue-600 fade-in-up" aria-label="View my LinkedIn Profile">
+                <a href="https://www.linkedin.com/in/mohammed-khalifa-8522b6108" target="_blank" class="text-gray-500 hover:text-blue-600 fade-in-up" aria-label="View my LinkedIn Profile">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"/></svg>
                 </a>
-                <a href="https://github.com/Mohammed-K-Mohammed" target="_blank" class="text-slate-500 hover:text-slate-900 fade-in-up" aria-label="View my GitHub Profile">
+                <a href="https://github.com/Mohammed-K-Mohammed" target="_blank" class="text-gray-500 hover:text-gray-900 fade-in-up" aria-label="View my GitHub Profile">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.82c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.578.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
                 </a>
-                 <a href="tel:0502859052" class="text-slate-500 hover:text-blue-600 fade-in-up" aria-label="Call me">
+                 <a href="tel:0502859052" class="text-gray-500 hover:text-blue-600 fade-in-up" aria-label="Call me">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.62 10.79a15.35 15.35 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg>
                 </a>
             </div>
         </div>
     </section>
 
-    <footer class="bg-slate-800 text-white py-6">
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
         <div class="container mx-auto px-6 text-center">
             <p>&copy; 2025 Mohammed Khalifa. All Rights Reserved.</p>
         </div>
     </footer>
     
+    <!-- Back to Top Button -->
     <a href="#" id="back-to-top" aria-label="Back to top">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
     </a>
 
     <script>
-        const competencyData = {
-            data: {
-                labels: ['Data Modeling', 'Business Strategy', 'Visualization', 'Quant. Finance', 'Forecasting'],
-                values: [85, 90, 95, 80, 75],
-                skills: [
-                    { name: 'Statistical Modeling & Analysis', desc: 'Applying statistical principles to uncover trends and insights.' },
-                    { name: 'Python & R', desc: 'Programming for data manipulation, analysis, and automation.' },
-                    { name: 'SQL & Databases', desc: 'Extracting and managing data from relational databases.' },
-                    { name: 'Tableau & Power BI', desc: 'Creating interactive dashboards for data storytelling.' },
-                    { name: 'Financial Modeling', desc: 'Building models to forecast financial performance and risk.' }
-                ]
-            },
-            cyber: {
-                labels: ['Threat Analysis', 'Risk Management', 'Incident Response', 'Compliance', 'Network Security'],
-                values: [90, 85, 80, 75, 85],
-                skills: [
-                    { name: 'SIEM & Log Analysis (Splunk)', desc: 'Monitoring and analyzing security data to detect threats.' },
-                    { name: 'Vulnerability Assessment', desc: 'Using tools like Nessus and Nmap to identify weaknesses.' },
-                    { name: 'Quantitative Risk Assessment', desc: 'Applying financial principles to evaluate security risks.' },
-                    { name: 'NIST Cybersecurity Framework', desc: 'Implementing industry standards for security posture.' },
-                    { name: 'Incident Documentation', desc: 'Maintaining clear records for response and compliance.' }
-                ]
-            }
-        };
-
-        let currentView = 'data';
-        let competencyChart;
-
-        const skillsList = document.getElementById('skillsList');
-        const dataBtn = document.getElementById('dataBtn');
-        const cyberBtn = document.getElementById('cyberBtn');
-
-        function updateDashboard(view) {
-            currentView = view;
-            const data = competencyData[view];
-
-            competencyChart.data.labels = data.labels;
-            competencyChart.data.datasets[0].data = data.values;
-            competencyChart.update();
-
-            let skillsHTML = '';
-            data.skills.forEach(skill => {
-                skillsHTML += `<li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✔</span><div><h4 class="font-semibold text-slate-800">${skill.name}</h4><p class="text-slate-500 text-sm">${skill.desc}</p></div></li>`;
-            });
-            skillsList.innerHTML = skillsHTML;
-            
-            if (view === 'data') {
-                dataBtn.classList.remove('inactive-view-btn');
-                dataBtn.classList.add('active-view-btn');
-                cyberBtn.classList.remove('active-view-btn');
-                cyberBtn.classList.add('inactive-view-btn');
-            } else {
-                cyberBtn.classList.remove('inactive-view-btn');
-                cyberBtn.classList.add('active-view-btn');
-                dataBtn.classList.remove('active-view-btn');
-                dataBtn.classList.add('inactive-view-btn');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const ctx = document.getElementById('competencyChart').getContext('2d');
-            competencyChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Proficiency',
-                        data: [],
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                            pointLabels: { 
-                                font: { size: 12, family: "'Inter', sans-serif" },
-                                color: '#334155'
-                            },
-                            ticks: {
-                                backdropColor: 'transparent',
-                                stepSize: 25,
-                                font: { size: 10, family: "'Inter', sans-serif" },
-                                color: '#64748b'
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 100
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.r !== null) {
-                                        label += context.parsed.r + '%';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            updateDashboard('data');
-        });
-        
-        dataBtn.addEventListener('click', () => updateDashboard('data'));
-        cyberBtn.addEventListener('click', () => updateDashboard('cyber'));
-
+        // Mobile menu toggle
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         menuBtn.addEventListener('click', () => {
             const isHidden = mobileMenu.classList.contains('hidden');
             if (isHidden) {
                 mobileMenu.classList.remove('hidden');
-                setTimeout(() => { mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px'; }, 10);
+                setTimeout(() => {
+                    mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+                }, 10);
             } else {
                 mobileMenu.style.maxHeight = '0';
-                setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                }, 300);
             }
         });
 
+        // Intersection Observer for fade-in animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -427,6 +324,7 @@
             observer.observe(el);
         });
         
+        // Back to Top Button
         const backToTopButton = document.getElementById('back-to-top');
         window.addEventListener('scroll', () => {
             if (window.pageYOffset > 300) {
